@@ -1,41 +1,54 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from .models import TimeSheet
+from .models import TimeSheet, EmployeeProfile
 
 
-# ✅ HOME PAGE (FIX YOUR ERROR)
 @login_required
 def home(request):
-    timesheets = TimeSheet.objects.filter(user=request.user).order_by("-date")
-    return render(request, "home.html", {"timesheets": timesheets})
 
+    user = request.user
 
-# ✅ CREATE TIMESHEET
-@login_required
-def create_timesheet(request):
-    if request.method == "POST":
+    # 🔥 ADMIN
+    if user.is_superuser:
+        tasks = TimeSheet.objects.all().order_by("-id")
+        role = "admin"
 
-        dates = request.POST.getlist("date")
-        hours = request.POST.getlist("hours")
-        descriptions = request.POST.getlist("description")
+    else:
+        try:
+            profile = EmployeeProfile.objects.get(user=user)
+            role = profile.role
 
-        for i in range(len(dates)):
-            if dates[i] and hours[i]:
-                TimeSheet.objects.create(
-                    date=dates[i],
-                    hours=float(hours[i]),
-                    description=descriptions[i] if descriptions[i] else "",
-                    user=request.user
-                )
+            # 👨‍💼 MANAGER / HR / SALES / HEADS
+            if role in [
+                'PracticeHead',
+                'PrincipalSoftwareEngineer',
+                'HR',
+                'Sales',
+                'Manager',
+            ]:
 
-        return redirect("home")
+                tasks = TimeSheet.objects.filter(
+                    user__employeeprofile__reporting_manager=user
+                ).order_by("-id")
 
-    return render(request, "create_timesheet.html")
+            # 👤 EMPLOYEE → ONLY 1 RECORD (FIX HERE)
+            else:
+                tasks = TimeSheet.objects.filter(
+                    user=user
+                ).order_by("-id")[:1]
 
+        except EmployeeProfile.DoesNotExist:
 
-# ✅ DELETE TIMESHEET
-@login_required
-def delete_timesheet(request, id):
-    obj = get_object_or_404(TimeSheet, id=id, user=request.user)
-    obj.delete()
-    return redirect("home")
+            role = "employee"
+            tasks = TimeSheet.objects.filter(
+                user=user
+            ).order_by("-id")[:1]
+
+    return render(
+        request,
+        'home.html',
+        {
+            'tasks': tasks,
+            'role': role
+        }
+    )

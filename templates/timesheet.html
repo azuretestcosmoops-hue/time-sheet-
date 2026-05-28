@@ -1,0 +1,32 @@
+<h1>Timesheet Dashboard</h1>
+
+<!-- 👇 TEAM SUMMARY ONLY FOR MANAGER/ADMIN -->
+{% if role == "manager" or role == "admin" %}
+    <div class="summary">
+        <h2>📊 Team Summary</h2>
+    </div>
+{% endif %}
+
+<!-- 👤 USER MESSAGE -->
+{% if role == "user" %}
+    <p>👤 You are viewing only your own timesheet</p>
+{% endif %}
+
+<!-- TABLE -->
+<table border="1">
+    <tr>
+        <th>User</th>
+        <th>Date</th>
+        <th>Task</th>
+        <th>Hours</th>
+    </tr>
+
+    {% for t in data %}
+    <tr>
+        <td>{{ t.user.username }}</td>
+        <td>{{ t.date }}</td>
+        <td>{{ t.task }}</td>
+        <td>{{ t.hours }}</td>
+    </tr>
+    {% endfor %}
+</table>

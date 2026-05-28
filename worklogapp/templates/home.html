@@ -1,37 +1,200 @@
-<h1>My Timesheet</h1>
+<!DOCTYPE html>
+<html>
 
-<form method="POST">
-    {% csrf_token %}
+<head>
 
-    <input type="date" name="date" required><br><br>
+    <title>Timesheet Dashboard</title>
 
-    <input type="text" name="task" placeholder="Task" required><br><br>
+    <style>
 
-    <input type="number" name="hours" placeholder="Hours" required><br><br>
+        body {
+            font-family: Arial;
+            background: #f5f6fa;
+            padding: 20px;
+        }
 
-    <textarea name="comments" placeholder="Comments"></textarea><br><br>
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
 
-    <button type="submit">Add Task</button>
-</form>
+        h1 {
+            color: #2f3640;
+        }
 
-<hr>
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+        }
 
-<table border="1">
-<tr>
-    <th>User</th>
-    <th>Date</th>
-    <th>Task</th>
-    <th>Hours</th>
-    <th>Comments</th>
-</tr>
+        button {
+            background: green;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
 
-{% for i in data %}
-<tr>
-    <td>{{ i.user }}</td>
-    <td>{{ i.date }}</td>
-    <td>{{ i.task }}</td>
-    <td>{{ i.hours_spent }}</td>
-    <td>{{ i.comments }}</td>
-</tr>
-{% endfor %}
-</table>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+
+        th {
+            background: #273c75;
+            color: white;
+            padding: 10px;
+        }
+
+        td {
+            padding: 10px;
+            text-align: center;
+        }
+
+        .summary {
+            margin-top: 40px;
+            background: #f1f2f6;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>
+        Welcome {{ request.user.username }}
+    </h1>
+
+    <p>
+        Role:
+        {{ request.user.employeeprofile.role }}
+    </p>
+
+    <hr>
+
+    <h2>Create Task</h2>
+
+    <form method="POST">
+
+        {% csrf_token %}
+
+        <input type="date" name="date" required>
+
+        <br><br>
+
+        <input
+            type="text"
+            name="task"
+            placeholder="Task Title"
+            required
+        >
+
+        <br><br>
+
+        <input
+            type="number"
+            step="0.5"
+            name="hours"
+            placeholder="Hours"
+            required
+        >
+
+        <br><br>
+
+        <textarea
+            name="comments"
+            placeholder="Task Description"
+        ></textarea>
+
+        <br><br>
+
+        <button type="submit">
+            Add Task
+        </button>
+
+    </form>
+
+    <hr>
+
+    <h2>Your Tasks</h2>
+
+    <table>
+
+        <tr>
+            <th>User</th>
+            <th>Date</th>
+            <th>Task</th>
+            <th>Hours</th>
+            <th>Comments</th>
+        </tr>
+
+        {% for i in data %}
+
+        <tr>
+
+            <td>{{ i.user }}</td>
+
+            <td>{{ i.date }}</td>
+
+            <td>{{ i.task }}</td>
+
+            <td>{{ i.hours_spent }}</td>
+
+            <td>{{ i.comments }}</td>
+
+        </tr>
+
+        {% endfor %}
+
+    </table>
+
+
+    <!-- ONLY TEAM HEADS CAN SEE -->
+
+
+    {% if request.user.is_superuser or request.user.employeeprofile and request.user.employeeprofile.role == 'PracticeHead' or request.user.employeeprofile.role == 'Manager' %}
+
+    <div class="summary">
+
+        <h2>📊 Team Summary</h2>
+
+        <table>
+
+            <tr>
+                <th>Team</th>
+                <th>Total Tasks</th>
+                <th>Total Hours</th>
+            </tr>
+
+            <tr>
+                <td>{{ request.user.employeeprofile.role }}</td>
+                <td>1</td>
+                <td>2.0</td>
+            </tr>
+
+        </table>
+
+    </div>
+
+    {% endif %}
+
+
+</div>
+
+</body>
+
+</html>

@@ -2,41 +2,113 @@
 <html>
 <head>
     <title>Home - Timesheet</title>
+
     <style>
-        body { font-family: Arial; background: #f5f6fa; padding: 20px; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-        a { color: red; text-decoration: none; }
-        .btn { padding: 10px; background: green; color: white; text-decoration: none; }
+
+        body {
+            font-family: Arial;
+            background: #f5f6fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .btn {
+            padding: 10px;
+            background: green;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .delete-btn {
+            color: red;
+            text-decoration: none;
+        }
+
     </style>
+
 </head>
+
 <body>
 
 <div class="container">
-    <h2>Your Timesheets</h2>
 
-    <a class="btn" href="/create/">Create New</a>
+    <h2>Welcome {{ request.user.username }}</h2>
+
+    <a class="btn" href="/create/">
+        Create New Task
+    </a>
 
     <table>
+
         <tr>
             <th>Date</th>
             <th>Hours</th>
-            <th>Description</th>
+            <th>Task</th>
+            <th>Status</th>
             <th>Action</th>
         </tr>
 
         {% for t in timesheets %}
+
         <tr>
+
             <td>{{ t.date }}</td>
+
             <td>{{ t.hours }}</td>
+
             <td>{{ t.description }}</td>
+
+            <td>{{ t.status }}</td>
+
             <td>
-                <a href="/delete/{{ t.id }}/">Delete</a>
+                <a class="delete-btn" href="/delete/{{ t.id }}/">
+                    Delete
+                </a>
             </td>
+
         </tr>
+
         {% endfor %}
+
     </table>
+
+
+    <!-- TEAM SUMMARY ONLY FOR HEADS -->
+
+
+    {% if request.user.employeeprofile.role == 'PracticeHead' or request.user.employeeprofile.role == 'Manager' or request.user.is_superuser %}
+
+    <hr>
+
+    
+
+    <p>
+        Only Team Heads can see this section.
+    </p>
+
+    {% endif %}
+
+
 </div>
 
 </body>
